@@ -101,12 +101,15 @@
   NSData* colorAsData = [userDefaults objectForKey:[self highlightColorDefaultsKeyName]];
 
   if ( colorAsData != nil ) {
+      NSLog(@"%s found color data", __func__);
     NSColor* color = [NSKeyedUnarchiver unarchiveObjectWithData:colorAsData];
 
-    highlightColorAttributes = 
-        [NSDictionary dictionaryWithObjectsAndKeys: color,
-                                                    NSBackgroundColorAttributeName,
-                                                    nil];
+      if (color) {
+          NSLog(@"%s retrieved color %@", __func__, color);
+          highlightColorAttributes = @{NSBackgroundColorAttributeName: color};
+      } else {
+
+      }
   }
 }
 
@@ -121,9 +124,11 @@
 //-----------------------------------------------------------------------------------------------
 - (void) highlightLineInView:(id)view containingRange:(NSRange)range {
 //-----------------------------------------------------------------------------------------------
-  @try {                                                                                                                                                    
-    [[view layoutManager] addTemporaryAttributes: highlightColorAttributes 
-                               forCharacterRange: [[view string] lineRangeForRange:range] ];
+  @try {
+      if (highlightColorAttributes) {
+          [[view layoutManager] addTemporaryAttributes: highlightColorAttributes
+                                     forCharacterRange: [[view string] lineRangeForRange:range] ];
+      }
   }
   @catch ( NSException* exception ) {
     if ( [[exception name] isNotEqualTo:NSRangeException] ) {
@@ -149,6 +154,7 @@
 //-----------------------------------------------------------------------------------------------
 - (void) selectHighlightColor:(id)sender {
 //-----------------------------------------------------------------------------------------------
+    NSLog(@"%s", __func__);
   NSColorPanel *colorPanel = [NSColorPanel sharedColorPanel];
 
   NSColor* color = [highlightColorAttributes objectForKey:NSBackgroundColorAttributeName];
@@ -168,11 +174,11 @@
 //-----------------------------------------------------------------------------------------------
   NSColorPanel* colorPanel = [NSColorPanel sharedColorPanel];
 
-  highlightColorAttributes = 
-      [NSDictionary dictionaryWithObjectsAndKeys: [colorPanel color],
-                                                  NSBackgroundColorAttributeName, 
-                                                  nil];
-  [self saveHighlightColor:[colorPanel color]];
+    NSColor *color = [colorPanel color];
+    highlightColorAttributes = @{NSBackgroundColorAttributeName: color};
+    NSLog(@"%s saving color %@", __func__, color);
+
+    [self saveHighlightColor:color];
                                                     
   // Update window size (grow then back to what it was) in order to cause frame
   // change even. This is because we can't have a guaranteed valid reference to
@@ -192,7 +198,8 @@
 //-----------------------------------------------------------------------------------------------
 - (void) colorPanelWillClose:(NSNotification*)notification {
 //-----------------------------------------------------------------------------------------------
-  NSColorPanel *colorPanel = [NSColorPanel sharedColorPanel];
+    NSLog(@"%s", __func__);
+    NSColorPanel *colorPanel = [NSColorPanel sharedColorPanel];
 
   [[NSNotificationCenter defaultCenter] removeObserver: self 
                                                   name: NSWindowWillCloseNotification 
