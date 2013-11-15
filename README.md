@@ -1,3 +1,5 @@
+**These plugins are not tested with Xcode 5.x. CurrentLineHighlighter is known to crash Xcode 5.**
+
 __These plugins are known to be compatible with Xcode 4.5.2. For Xcode 4.0.2 support, see the xcode_402 branch.__
 
 __===== DESCRIPTION =====__
